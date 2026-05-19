@@ -378,7 +378,7 @@ function initMap() {
         ymaps.ready(function() {
             const coords = cmsData.map_coords ? 
                 cmsData.map_coords.value.split(',').map(Number) : 
-                [55.7558, 37.6173];
+                [46.9555, 42.7407];
 
             const map = new ymaps.Map('yandex-map', {
                 center: coords,
@@ -417,7 +417,7 @@ window.addEventListener('load', initMap);
 // Google Sheets Integration (Orders)
 // ============================================
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBVV9bynvlru6bhj4zTamgc9GXQWE1s4NAeVEuScKWwaeRX1Wt5LNsZXweELWMBB7z/exec';
 
 function submitOrder(event) {
     event.preventDefault();
