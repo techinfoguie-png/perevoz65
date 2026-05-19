@@ -5,14 +5,14 @@
 // Конфигурация (замените на ваши ID)
 const CONFIG = {
     // ID таблицы CMS (из URL таблицы)
-    CMS_SHEET_ID: 'YOUR_CMS_SHEET_ID',
+    CMS_SHEET_ID: '1Gj7mlW39zaN4mVmRCR1xoIZ1TXMvmKzn9V9Xe3Ut-wg',
     // ID таблицы для заявок
     ORDERS_SHEET_ID: 'YOUR_ORDERS_SHEET_ID',
     // API ключ для чтения (необязательно для публичных таблиц)
     API_KEY: ''
 };
 
-// Глобальные данные CMS
+// Глобальные данные CMS https://docs.google.com/spreadsheets/d/1Gj7mlW39zaN4mVmRCR1xoIZ1TXMvmKzn9V9Xe3Ut-wg/edit?usp=sharing
 let cmsData = {};
 
 // ============================================
@@ -24,7 +24,7 @@ async function loadCMSData() {
 
     try {
         // Пробуем загрузить из Google Sheets
-        if (CONFIG.CMS_SHEET_ID && CONFIG.CMS_SHEET_ID !== 'YOUR_CMS_SHEET_ID') {
+        if (CONFIG.CMS_SHEET_ID && CONFIG.CMS_SHEET_ID !== '1Gj7mlW39zaN4mVmRCR1xoIZ1TXMvmKzn9V9Xe3Ut-wg') {
             const data = await fetchSheetData(CONFIG.CMS_SHEET_ID, 'CMS');
             if (data && data.length > 0) {
                 cmsData = parseCMSData(data);
