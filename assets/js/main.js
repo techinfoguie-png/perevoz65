@@ -7,7 +7,7 @@ const CONFIG = {
     // ID таблицы CMS (из URL таблицы)
     CMS_SHEET_ID: '1Gj7mlW39zaN4mVmRCR1xoIZ1TXMvmKzn9V9Xe3Ut-wg',
     // ID таблицы для заявок
-    ORDERS_SHEET_ID: 'YOUR_ORDERS_SHEET_ID',
+    ORDERS_SHEET_ID: '1Gj7mlW39zaN4mVmRCR1xoIZ1TXMvmKzn9V9Xe3Ut-wg',
     // API ключ для чтения (необязательно для публичных таблиц)
     API_KEY: ''
 };
@@ -378,7 +378,7 @@ function initMap() {
         ymaps.ready(function() {
             const coords = cmsData.map_coords ? 
                 cmsData.map_coords.value.split(',').map(Number) : 
-                [46.9555, 42.7407];
+                [ 142.7462, 46.8865];
 
             const map = new ymaps.Map('yandex-map', {
                 center: coords,
