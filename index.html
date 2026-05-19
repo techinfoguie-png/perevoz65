@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Грузовоз — Доставка сыпучих материалов</title>
+    <meta name="description" content="Доставка песка, щебня, грунта самосвалами 6 м³ по Москве и области. 4 машины в автопарке.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=demo&lang=ru_RU" type="text/javascript"></script>
+</head>
+<body>
+
+    <!-- CMS Loading Overlay -->
+    <div class="cms-loading" id="cms-loader">
+        <div class="cms-loading-spinner"></div>
+        <div class="cms-loading-text">Загрузка настроек...</div>
+    </div>
+
+    <!-- CMS Admin Panel (появляется при нажатии на кнопку) -->
+    <button class="cms-toggle" onclick="toggleCMSPanel()" title="CMS Панель">⚙️</button>
+    <div class="cms-panel" id="cms-panel">
+        <h4>⚙️ CMS Панель</h4>
+        <div class="cms-panel-row">
+            <span>Тема:</span>
+            <span id="cms-theme-status">Загружается...</span>
+        </div>
+        <div class="cms-panel-row">
+            <span>Цены:</span>
+            <span id="cms-price-status">Загружается...</span>
+        </div>
+        <div class="cms-panel-row">
+            <span>Телефон:</span>
+            <span id="cms-phone-status">Загружается...</span>
+        </div>
+        <div class="cms-panel-row">
+            <span>Google Sheet:</span>
+            <a href="#" target="_blank" id="cms-sheet-link">Открыть</a>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="header-inner">
+            <a href="#" class="logo">
+                <div class="logo-icon">🚛</div>
+                <span id="cms-site-name">Грузовоз</span>
+            </a>
+            <nav>
+                <ul class="nav">
+                    <li><a href="#materials">Материалы</a></li>
+                    <li><a href="#calculator">Калькулятор</a></li>
+                    <li><a href="#fleet">Автопарк</a></li>
+                    <li><a href="#gallery">Фото</a></li>
+                    <li><a href="#contacts">Контакты</a></li>
+                </ul>
+            </nav>
+            <div class="header-phone">
+                <a href="tel:+79991234567" id="cms-phone-link">+7 (999) 123-45-67</a>
+                <span id="cms-work-hours">Работаем 24/7</span>
+            </div>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        </div>
+    </header>
+
+    <!-- Hero + Calculator -->
+    <section class="hero">
+        <div class="hero-inner">
+            <div class="hero-content">
+                <h1 id="cms-hero-title">Доставка сыпучих материалов самосвалами 6 м³</h1>
+                <p id="cms-hero-subtitle">Перевозим песок, щебень, грунт и другие сыпучие материалы по Москве и области. 4 самосвала в собственном автопарке. Точный расчёт стоимости за 10 секунд.</p>
+                <div class="hero-badges">
+                    <span class="badge" id="cms-badge-1">⚡ Доставка от 2 часов</span>
+                    <span class="badge" id="cms-badge-2">💰 От 4 500 ₽/рейс</span>
+                    <span class="badge" id="cms-badge-3">📍 Работаем по области</span>
+                </div>
+            </div>
+            <div class="calc-card" id="calculator">
+                <h2>Рассчитать стоимость</h2>
+                <p class="subtitle">Укажите параметры — получите цену мгновенно</p>
+
+                <div class="form-group">
+                    <label for="material">Материал</label>
+                    <select id="material" onchange="updateMaterialHighlight()">
+                        <option value="" data-base="0">Выберите материал</option>
+                        <option value="pesok" data-base="4500">Песок речной/карьерный</option>
+                        <option value="sheben" data-base="5200">Щебень гранитный</option>
+                        <option value="grunt" data-base="3800">Грунт плодородный</option>
+                        <option value="pesok-seyaniy" data-base="4800">Песок сеяный</option>
+                        <option value="sheben-izvestnyak" data-base="4600">Щебень известняковый</option>
+                        <option value="beton" data-base="6500">Бетонные смеси</option>
+                        <option value="torf" data-base="5500">Торф</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="distance">Расстояние (км)</label>
+                        <input type="number" id="distance" min="1" max="300" value="10" placeholder="Например: 25">
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">Количество машин</label>
+                        <input type="number" id="quantity" min="1" max="10" value="1" placeholder="1">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="distance-range">Или выберите на шкале</label>
+                    <input type="range" id="distance-range" min="1" max="150" value="10">
+                    <div class="range-value" id="range-value">10 км</div>
+                </div>
+
+                <button class="btn btn-primary" onclick="calculate()">
+                    🧮 Рассчитать стоимость
+                </button>
+
+                <div class="result-block" id="result">
+                    <div class="result-price" id="total-price">0 ₽</div>
+                    <div class="result-detail" id="result-detail"></div>
+                    <button class="btn btn-outline" style="margin-top: 1rem; width: 100%;" onclick="openOrderModal()">
+                        📝 Оформить заказ по этой цене
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Materials -->
+    <section class="section" id="materials">
+        <div class="section-header animate-on-scroll">
+            <h2 id="cms-materials-title">Популярные материалы</h2>
+            <p id="cms-materials-desc">Выберите нужный материал для вашего проекта. Все цены указаны за 1 машину (6 м³) с учётом погрузки.</p>
+        </div>
+        <div class="materials-grid">
+            <div class="material-card animate-on-scroll" data-material="pesok" onclick="selectMaterial('pesok', 4500)">
+                <div class="material-img">
+                    <img src="https://img.freepik.com/premium-photo/dump-truck-sand-pit-transports-sand-extraction-sand-open-pit-natural-building-materials_331695-5959.jpg" alt="Песок речной">
+                    <span class="material-badge">Хит</span>
+                </div>
+                <div class="material-info">
+                    <h3>Песок речной</h3>
+                    <p id="cms-pesok-desc">Чистый речной песок для строительства и отсыпки. Фракция 0-2 мм.</p>
+                    <div class="material-price" id="cms-pesok-price">от 4 500 ₽/машина</div>
+                </div>
+            </div>
+            <div class="material-card animate-on-scroll" data-material="sheben" onclick="selectMaterial('sheben', 5200)">
+                <div class="material-img">
+                    <img src="https://static.tildacdn.com/tild3636-6434-4137-a666-366436376636/Scheben-4.jpeg" alt="Щебень гранитный">
+                </div>
+                <div class="material-info">
+                    <h3>Щебень гранитный</h3>
+                    <p id="cms-sheben-desc">Фракции 5-20, 20-40, 40-70 для дорог и фундаментов. Высокая прочность.</p>
+                    <div class="material-price" id="cms-sheben-price">от 5 200 ₽/машина</div>
+                </div>
+            </div>
+            <div class="material-card animate-on-scroll" data-material="grunt" onclick="selectMaterial('grunt', 3800)">
+                <div class="material-img">
+                    <img src="https://shebenkamen.ru/upload/medialibrary/571/tablica_202.webp" alt="Грунт плодородный">
+                </div>
+                <div class="material-info">
+                    <h3>Грунт плодородный</h3>
+                    <p id="cms-grunt-desc">Чернозём и плодородная земля для озеленения и садовых работ.</p>
+                    <div class="material-price" id="cms-grunt-price">от 3 800 ₽/машина</div>
+                </div>
+            </div>
+            <div class="material-card animate-on-scroll" data-material="pesok-seyaniy" onclick="selectMaterial('pesok-seyaniy', 4800)">
+                <div class="material-img">
+                    <img src="https://kimi-web-img.moonshot.cn/img/img.freepik.com/e03a3f382f263082de59bea5f26b9fa1a680020b.jpg" alt="Песок сеяный">
+                </div>
+                <div class="material-info">
+                    <h3>Песок сеяный</h3>
+                    <p id="cms-pesok-seyaniy-desc">Очищенный от примесей, для штукатурки, кладки и бетонных работ.</p>
+                    <div class="material-price" id="cms-pesok-seyaniy-price">от 4 800 ₽/машина</div>
+                </div>
+            </div>
+            <div class="material-card animate-on-scroll" data-material="sheben-izvestnyak" onclick="selectMaterial('sheben-izvestnyak', 4600)">
+                <div class="material-img">
+                    <img src="https://kimi-web-img.moonshot.cn/img/os1.ru/448817c06bbad15de2391379797b6c4f4d2b1b5a.jpg" alt="Щебень известняковый">
+                    <span class="material-badge">Эконом</span>
+                </div>
+                <div class="material-info">
+                    <h3>Щебень известняковый</h3>
+                    <p id="cms-sheben-izvestnyak-desc">Экономичный вариант для дорожного основания и благоустройства.</p>
+                    <div class="material-price" id="cms-sheben-izvestnyak-price">от 4 600 ₽/машина</div>
+                </div>
+            </div>
+            <div class="material-card animate-on-scroll" data-material="torf" onclick="selectMaterial('torf', 5500)">
+                <div class="material-img">
+                    <img src="https://kimi-web-img.moonshot.cn/img/promvest.info/0de1593665f0ffccdd47bda93a88e6426412ffb2.jpg" alt="Торф">
+                </div>
+                <div class="material-info">
+                    <h3>Торф</h3>
+                    <p id="cms-torf-desc">Низовой и верховой торф для сада, огорода и ландшафтного дизайна.</p>
+                    <div class="material-price" id="cms-torf-price">от 5 500 ₽/машина</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="section how-it-works">
+        <div class="section-header animate-on-scroll">
+            <h2 id="cms-steps-title">Как это работает</h2>
+            <p id="cms-steps-desc">4 простых шага от заявки до доставки</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step animate-on-scroll">
+                <div class="step-number">1</div>
+                <h3 id="cms-step-1-title">Выберите материал</h3>
+                <p id="cms-step-1-desc">Укажите тип и объём необходимого материала в калькуляторе</p>
+            </div>
+            <div class="step animate-on-scroll">
+                <div class="step-number">2</div>
+                <h3 id="cms-step-2-title">Рассчитайте цену</h3>
+                <p id="cms-step-2-desc">Система мгновенно покажет точную стоимость с учётом расстояния</p>
+            </div>
+            <div class="step animate-on-scroll">
+                <div class="step-number">3</div>
+                <h3 id="cms-step-3-title">Оформите заказ</h3>
+                <p id="cms-step-3-desc">Позвоните или оставьте заявку — подтвердим за 15 минут</p>
+            </div>
+            <div class="step animate-on-scroll">
+                <div class="step-number">4</div>
+                <h3 id="cms-step-4-title">Получите доставку</h3>
+                <p id="cms-step-4-desc">Самосвал приедет точно в срок и выгрузит материал</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fleet -->
+    <section class="section" id="fleet">
+        <div class="section-header animate-on-scroll">
+            <h2 id="cms-fleet-title">Наш автопарк</h2>
+            <p id="cms-fleet-desc">4 самосвала КамАЗ 65115 грузоподъёмностью до 10 тонн, объём кузова 6 м³</p>
+        </div>
+        <div class="fleet-grid">
+            <div class="fleet-card animate-on-scroll">
+                <div class="fleet-img">
+                    <img src="https://kimi-web-img.moonshot.cn/img/avatars.mds.yandex.net/431d5e2647f0c6cf003c398b0099a57c57b7a2da" alt="КамАЗ 65115 №1">
+                    <span class="fleet-status">✅ Свободен</span>
+                </div>
+                <div class="fleet-info">
+                    <h3 id="cms-truck-1-name">КамАЗ 65115 №1</h3>
+                    <div class="fleet-specs">
+                        <span>📦 Объём: 6 м³</span>
+                        <span>⚖️ Грузоподъёмность: 10 т</span>
+                        <span>🎨 Цвет: Зелёный</span>
+                        <span>📅 Год: 2019</span>
+                    </div>
+                </div>
+            </div>
+            <div class="fleet-card animate-on-scroll">
+                <div class="fleet-img">
+                    <img src="https://kimi-web-img.moonshot.cn/img/avatars.mds.yandex.net/58f5ff1ee7fd31ac4cc5c8968901eaa4e74da70b" alt="КамАЗ 65115 №2">
+                    <span class="fleet-status">✅ Свободен</span>
+                </div>
+                <div class="fleet-info">
+                    <h3 id="cms-truck-2-name">КамАЗ 65115 №2</h3>
+                    <div class="fleet-specs">
+                        <span>📦 Объём: 6 м³</span>
+                        <span>⚖️ Грузоподъёмность: 10 т</span>
+                        <span>🎨 Цвет: Зелёный</span>
+                        <span>📅 Год: 2020</span>
+                    </div>
+                </div>
+            </div>
+            <div class="fleet-card animate-on-scroll">
+                <div class="fleet-img">
+                    <img src="https://kimi-web-img.moonshot.cn/img/www.avtomash.ru/c24ce4366b63c567709e93d93799121b8724a640.jpg" alt="КамАЗ 65115 №3">
+                    <span class="fleet-status" style="background: rgba(244, 162, 97, 0.9);">🔄 В рейсе</span>
+                </div>
+                <div class="fleet-info">
+                    <h3 id="cms-truck-3-name">КамАЗ 65115 №3</h3>
+                    <div class="fleet-specs">
+                        <span>📦 Объём: 6 м³</span>
+                        <span>⚖️ Грузоподъёмность: 10 т</span>
+                        <span>🎨 Цвет: Бирюзовый</span>
+                        <span>📅 Год: 2018</span>
+                    </div>
+                </div>
+            </div>
+            <div class="fleet-card animate-on-scroll">
+                <div class="fleet-img">
+                    <img src="https://kimi-web-img.moonshot.cn/img/promvest.info/0de1593665f0ffccdd47bda93a88e6426412ffb2.jpg" alt="КамАЗ 65115 №4">
+                    <span class="fleet-status">✅ Свободен</span>
+                </div>
+                <div class="fleet-info">
+                    <h3 id="cms-truck-4-name">КамАЗ 65115 №4</h3>
+                    <div class="fleet-specs">
+                        <span>📦 Объём: 6 м³</span>
+                        <span>⚖️ Грузоподъёмность: 10 т</span>
+                        <span>🎨 Цвет: Зелёный</span>
+                        <span>📅 Год: 2021</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery -->
+    <section class="section" id="gallery">
+        <div class="section-header animate-on-scroll">
+            <h2 id="cms-gallery-title">Фото с объектов</h2>
+            <p id="cms-gallery-desc">Реальные фотографии нашей работы и техники</p>
+        </div>
+        <div class="gallery-grid">
+            <div class="gallery-item animate-on-scroll" onclick="openImageModal(this)">
+                <img src="https://img.freepik.com/premium-photo/dump-truck-sand-pit-transports-sand-extraction-sand-open-pit-natural-building-materials_331695-5959.jpg" alt="Доставка песка">
+                <div class="gallery-overlay">🔍</div>
+            </div>
+            <div class="gallery-item animate-on-scroll" onclick="openImageModal(this)">
+                <img src="https://static.tildacdn.com/tild3636-6434-4137-a666-366436376636/Scheben-4.jpeg" alt="Щебень">
+                <div class="gallery-overlay">🔍</div>
+            </div>
+            <div class="gallery-item animate-on-scroll" onclick="openImageModal(this)">
+                <img src="https://kimi-web-img.moonshot.cn/img/os1.ru/448817c06bbad15de2391379797b6c4f4d2b1b5a.jpg" alt="Самосвал в карьере">
+                <div class="gallery-overlay">🔍</div>
+            </div>
+            <div class="gallery-item animate-on-scroll" onclick="openImageModal(this)">
+                <img src="https://kimi-web-img.moonshot.cn/img/img.freepik.com/e03a3f382f263082de59bea5f26b9fa1a680020b.jpg" alt="Погрузка">
+                <div class="gallery-overlay">🔍</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Us -->
+    <section class="section why-us">
+        <div class="section-header animate-on-scroll">
+            <h2 id="cms-features-title">Почему выбирают нас</h2>
+            <p id="cms-features-desc">Работаем честно и прозрачно — цена фиксируется при расчёте</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature animate-on-scroll">
+                <div class="feature-icon">⚡</div>
+                <h3 id="cms-feature-1-title">Быстрая доставка</h3>
+                <p id="cms-feature-1-desc">Среднее время подачи машины — от 2 часов. Работаем без выходных и праздников.</p>
+            </div>
+            <div class="feature animate-on-scroll">
+                <div class="feature-icon">💰</div>
+                <h3 id="cms-feature-2-title">Честная цена</h3>
+                <p id="cms-feature-2-desc">Тариф прозрачный: базовая стоимость + 1000 ₽ за каждые 10 км. Никаких скрытых платежей.</p>
+            </div>
+            <div class="feature animate-on-scroll">
+                <div class="feature-icon">🛡️</div>
+                <h3 id="cms-feature-3-title">Гарантия объёма</h3>
+                <p id="cms-feature-3-desc">Каждый самосвал загружается на 6 м³. Контролируем вес на весах. Недогруз — вернём деньги.</p>
+            </div>
+            <div class="feature animate-on-scroll">
+                <div class="feature-icon">📞</div>
+                <h3 id="cms-feature-4-title">Поддержка 24/7</h3>
+                <p id="cms-feature-4-desc">Диспетчер всегда на связи. Отслеживайте машину от погрузки до выгрузки.</p>
+            </div>
+            <div class="feature animate-on-scroll">
+                <div class="feature-icon">🚛</div>
+                <h3 id="cms-feature-5-title">Собственный автопарк</h3>
+                <p id="cms-feature-5-desc">4 самосвала в собственности — не зависим от посредников и аренды. Всегда есть свободная машина.</p>
+            </div>
+            <div class="feature animate-on-scroll">
+                <div class="feature-icon">📋</div>
+                <h3 id="cms-feature-6-title">Документы</h3>
+                <p id="cms-feature-6-desc">Предоставляем все необходимые документы: ТТН, сертификаты качества, акты выполненных работ.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Info -->
+    <section class="section">
+        <div class="section-header animate-on-scroll">
+            <h2 id="cms-formula-title">Формула расчёта</h2>
+            <p id="cms-formula-desc">Всё прозрачно — вы сами можете проверить стоимость</p>
+        </div>
+        <div class="animate-on-scroll" style="background: white; border-radius: var(--radius-lg); padding: 2.5rem; box-shadow: var(--shadow-md); max-width: 900px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, rgba(26,95,42,0.05) 0%, rgba(26,95,42,0.02) 100%); border-radius: var(--radius); padding: 2rem; text-align: center; margin-bottom: 2rem; border: 2px dashed var(--primary);">
+                <div style="font-size: 1.3rem; font-weight: 700; color: var(--dark); margin-bottom: 1rem;">
+                    💡 Формула стоимости
+                </div>
+                <div style="font-family: monospace; font-size: 1.1rem; background: white; padding: 1.5rem; border-radius: var(--radius); border: 2px solid var(--gray-200);">
+                    <strong style="color: var(--primary);">Итого</strong> = (Базовая цена материала + ceil(Расстояние / <span id="cms-delivery-step">10</span>) × <span id="cms-delivery-rate">1000</span> ₽) × Количество машин
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; text-align: center;">
+                <div style="padding: 1.5rem; background: var(--gray-100); border-radius: var(--radius);">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📦</div>
+                    <div style="font-weight: 700; margin-bottom: 0.25rem; font-size: 1.1rem;">Базовая цена</div>
+                    <div style="color: var(--gray-600); font-size: 0.9rem;">Стоимость 6 м³ материала с погрузкой</div>
+                </div>
+                <div style="padding: 1.5rem; background: var(--gray-100); border-radius: var(--radius);">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📍</div>
+                    <div style="font-weight: 700; margin-bottom: 0.25rem; font-size: 1.1rem;">Доставка</div>
+                    <div style="color: var(--gray-600); font-size: 0.9rem;" id="cms-delivery-text">+1000 ₽ за каждые 10 км от карьера</div>
+                </div>
+                <div style="padding: 1.5rem; background: var(--gray-100); border-radius: var(--radius);">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🚛</div>
+                    <div style="font-weight: 700; margin-bottom: 0.25rem; font-size: 1.1rem;">Количество</div>
+                    <div style="color: var(--gray-600); font-size: 0.9rem;">Умножаем на число рейсов/машин</div>
+                </div>
+            </div>
+            <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(244,162,97,0.1) 0%, rgba(231,111,81,0.1) 100%); border-radius: var(--radius); border-left: 4px solid var(--accent);">
+                <strong>Пример расчёта:</strong> Песок (4 500 ₽) + расстояние 35 км (4 000 ₽, т.к. 35/10=3.5, округляем до 4) = <strong style="color: var(--primary);">8 500 ₽ за 1 машину</strong>. При заказе 2 машин — <strong>17 000 ₽</strong>.
+            </div>
+        </div>
+    </section>
+
+    <!-- Yandex Map -->
+    <section class="section map-section" id="map">
+        <div class="section-header animate-on-scroll">
+            <h2 id="cms-map-title">Зона доставки</h2>
+            <p id="cms-map-desc">Работаем по Москве и Московской области в радиусе 150 км</p>
+        </div>
+        <div class="map-container" id="yandex-map">
+            <div class="map-overlay animate-on-scroll">
+                <h3>📍 Наш адрес</h3>
+                <p id="cms-address">🏢 Москва, ул. Строителей, 15</p>
+                <p id="cms-map-phone">📞 +7 (999) 123-45-67</p>
+                <p id="cms-work-time">⏰ Режим работы: 24/7</p>
+                <p id="cms-base-info">🚛 База отгрузки: 15 мин от МКАД</p>
+                <button class="btn btn-primary" style="margin-top: 1rem; width: 100%;" onclick="openOrderModal()">
+                    📝 Заказать доставку
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Order Form Section -->
+    <section class="order-section" id="order">
+        <div class="order-inner">
+            <h2 id="cms-order-title">Оформить заказ</h2>
+            <p id="cms-order-desc">Заполните форму — мы перезвоним в течение 15 минут для подтверждения</p>
+
+            <div class="order-form" id="orderFormContainer">
+                <h3>📝 Данные для заявки</h3>
+                <form id="orderForm" onsubmit="submitOrder(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="order-name">Ваше имя *</label>
+                            <input type="text" id="order-name" required placeholder="Иван Иванов">
+                        </div>
+                        <div class="form-group">
+                            <label for="order-phone">Телефон *</label>
+                            <input type="tel" id="order-phone" required placeholder="+7 (999) 123-45-67">
+                        </div>
+                        <div class="form-group">
+                            <label for="order-material">Материал</label>
+                            <select id="order-material">
+                                <option value="">Выберите материал</option>
+                                <option value="Песок речной">Песок речной</option>
+                                <option value="Щебень гранитный">Щебень гранитный</option>
+                                <option value="Грунт плодородный">Грунт плодородный</option>
+                                <option value="Песок сеяный">Песок сеяный</option>
+                                <option value="Щебень известняковый">Щебень известняковый</option>
+                                <option value="Торф">Торф</option>
+                                <option value="Другое">Другое (укажу в комментарии)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="order-quantity">Количество машин</label>
+                            <input type="number" id="order-quantity" min="1" max="10" value="1" placeholder="1">
+                        </div>
+                        <div class="form-group form-full">
+                            <label for="order-address">Адрес доставки *</label>
+                            <input type="text" id="order-address" required placeholder="г. Москва, ул. Примерная, д. 1">
+                        </div>
+                        <div class="form-group form-full">
+                            <label for="order-comment">Комментарий</label>
+                            <textarea id="order-comment" rows="3" placeholder="Удобное время доставки, особенности подъезда и т.д."></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary submit-btn" id="submitBtn">
+                        📤 Отправить заявку
+                    </button>
+                    <p style="text-align: center; margin-top: 1rem; font-size: 0.85rem; color: var(--gray-600);">
+                        Нажимая кнопку, вы соглашаетесь с обработкой персональных данных
+                    </p>
+                </form>
+            </div>
+
+            <div class="form-success" id="formSuccess">
+                <div class="form-success-icon">✓</div>
+                <h3>Заявка отправлена!</h3>
+                <p>Мы получили вашу заявку и перезвоним вам в течение 15 минут для уточнения деталей.</p>
+                <button class="btn btn-outline" style="margin-top: 1.5rem;" onclick="resetForm()">
+                    📝 Отправить ещё одну заявку
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta" id="contacts">
+        <h2 id="cms-cta-title">Готовы сделать заказ?</h2>
+        <p id="cms-cta-desc">Позвоните прямо сейчас — рассчитаем стоимость и подадим машину в течение 2 часов</p>
+        <a href="tel:+79991234567" class="cta-phone" id="cms-cta-phone">+7 (999) 123-45-67</a>
+        <div class="cta-buttons">
+            <a href="https://wa.me/79991234567" class="btn btn-whatsapp" target="_blank" id="cms-whatsapp-link">💬 Написать в WhatsApp</a>
+            <a href="tel:+79991234567" class="btn" style="background: white; color: var(--primary);" id="cms-call-link">📞 Позвонить</a>
+            <button class="btn" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3);" onclick="openOrderModal()">
+                📝 Оставить заявку
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <div>
+                <div class="footer-brand">
+                    <div class="logo-icon">🚛</div>
+                    <span id="cms-footer-name">Грузовоз</span>
+                </div>
+                <p class="footer-desc" id="cms-footer-desc">
+                    Перевозка сыпучих материалов самосвалами 6 м³ по Москве и Московской области. 4 машины в собственном автопарке. Работаем с 2018 года.
+                </p>
+            </div>
+            <div>
+                <h4>Услуги</h4>
+                <ul class="footer-links">
+                    <li><a href="#materials">Доставка песка</a></li>
+                    <li><a href="#materials">Доставка щебня</a></li>
+                    <li><a href="#materials">Доставка грунта</a></li>
+                    <li><a href="#materials">Доставка торфа</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Информация</h4>
+                <ul class="footer-links">
+                    <li><a href="#calculator">Калькулятор</a></li>
+                    <li><a href="#fleet">Автопарк</a></li>
+                    <li><a href="#order">Цены</a></li>
+                    <li><a href="#contacts">Контакты</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Контакты</h4>
+                <ul class="footer-links">
+                    <li><a href="tel:+79991234567" id="cms-footer-phone">+7 (999) 123-45-67</a></li>
+                    <li><a href="mailto:info@gruzovoz.ru" id="cms-footer-email">info@gruzovoz.ru</a></li>
+                    <li id="cms-footer-address">Москва, ул. Строителей, 15</li>
+                    <li id="cms-footer-hours">Работаем 24/7</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom" id="cms-copyright">
+            © 2025 Грузовоз. Все права защищены. Перевозка сыпучих материалов самосвалами.
+        </div>
+    </footer>
+
+    <!-- Image Modal -->
+    <div class="modal-overlay" id="imageModal" onclick="closeImageModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeImageModal()">&times;</button>
+            <img id="modalImage" src="" alt="" style="width: 100%; border-radius: var(--radius);">
+        </div>
+    </div>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
