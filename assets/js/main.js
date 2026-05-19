@@ -378,7 +378,7 @@ function initMap() {
         ymaps.ready(function() {
             const coords = cmsData.map_coords ? 
                 cmsData.map_coords.value.split(',').map(Number) : 
-                [ 142.7462, 46.8865];
+                [46.955526, 142.740752];
 
             const map = new ymaps.Map('yandex-map', {
                 center: coords,
